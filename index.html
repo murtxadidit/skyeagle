@@ -730,7 +730,7 @@ footer{background:var(--navy2);border-top:1px solid var(--border);padding:clamp(
         <div class="fg"><label>Phone</label><input type="tel" placeholder="+965 XXXX XXXX"/></div>
       </div>
       <div class="fg"><label>Message</label><textarea placeholder="Tell us about your delivery needs..."></textarea></div>
-      <button class="fsub" onclick="handleSubmit(event)">Send Message →</button>
+      <button class="fsub" id="submit-btn">Send Message →</button>
     </div>
   </div>
 </section>
@@ -790,7 +790,60 @@ const co=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&!e.tar
 counters.forEach(c=>co.observe(c));
 let oc=213,dc=47;
 setInterval(()=>{oc+=Math.floor(Math.random()*2);dc=44+Math.floor(Math.random()*6);const od=document.getElementById("d-ord");const dd=document.getElementById("d-drv");if(od)od.textContent=oc;if(dd)dd.textContent=dc},3500);
-function handleSubmit(e){e.preventDefault();const b=e.target;const orig=b.textContent;b.textContent="✓ Message Sent!";b.style.background="linear-gradient(110deg,#0f6e56,#1d9e75)";setTimeout(()=>{b.textContent=orig;b.style.background=""},3000)}
+document.getElementById('submit-btn').addEventListener('click', async function(e) {
+  e.preventDefault();
+  
+  const btn = this;
+  const name = document.querySelector('input[placeholder="Ahmed Al-Rashidi"]').value;
+  const company = document.querySelector('input[placeholder="Company Name"]').value;
+  const email = document.querySelector('input[type="email"]').value;
+  const phone = document.querySelector('input[type="tel"]').value;
+  const message = document.querySelector('textarea').value;
+
+  // Basic validation
+  if (!name || !email || !message) {
+    btn.textContent = '⚠ Please fill Name, Email & Message';
+    btn.style.background = 'linear-gradient(110deg,#8b4513,#c0392b)';
+    setTimeout(() => {
+      btn.textContent = 'Send Message →';
+      btn.style.background = '';
+    }, 3000);
+    return;
+  }
+
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch('https://formspree.io/f/xgoqqbnv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, company, email, phone, message })
+    });
+
+    if (response.ok) {
+      btn.textContent = '✓ Message Sent Successfully!';
+      btn.style.background = 'linear-gradient(110deg,#0f6e56,#1d9e75)';
+      // Clear the form
+      document.querySelector('input[placeholder="Ahmed Al-Rashidi"]').value = '';
+      document.querySelector('input[placeholder="Company Name"]').value = '';
+      document.querySelector('input[type="email"]').value = '';
+      document.querySelector('input[type="tel"]').value = '';
+      document.querySelector('textarea').value = '';
+    } else {
+      throw new Error('Failed');
+    }
+  } catch (err) {
+    btn.textContent = '✗ Failed — Try Again';
+    btn.style.background = 'linear-gradient(110deg,#8b4513,#c0392b)';
+  }
+
+  setTimeout(() => {
+    btn.textContent = 'Send Message →';
+    btn.style.background = '';
+    btn.disabled = false;
+  }, 4000);
+});
 document.querySelectorAll("a[href^=\"#\"]").forEach(a=>a.addEventListener("click",e=>{const h=a.getAttribute("href");if(h==="#")return;const t=document.querySelector(h);if(t){e.preventDefault();t.scrollIntoView({behavior:"smooth",block:"start"});closeMobile()}}));
 </script>
 </body>
